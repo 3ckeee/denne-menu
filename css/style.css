@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;700&display=swap');
+
+body {
+    background-color: #000;
+    font-family: 'Archivo', sans-serif;
+    color: #B8A75D;
+    margin: 0;
+    padding: 0;
+}
+
+/* Container for daily menus */
+.daily-menu-list {
+    padding: 20px;
+    opacity: 0; /* Start hidden until animate class is added */
+    animation: fadeIn 1s forwards;  /* container fades in immediately */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Daily menu items start hidden */
+.daily-menu-item {
+    padding: 15px;
+    margin-bottom: 10px;
+    opacity: 0;
+}
+
+/* When an individual item gets the animate class, animate it: */
+.daily-menu-item.animate:nth-child(odd) {
+    background-color: #555 !important;
+    animation: slideInFromLeft 0.8s forwards;
+}
+
+.daily-menu-item.animate:nth-child(even) {
+    background-color: #000 !important;
+    animation: slideInFromRight 0.8s forwards;
+}
+
+@keyframes slideInFromLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInFromRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Text styling for menu items */
+.daily-menu-item h2,
+.daily-menu-item .daily-menu-content {
+    color: #B8A75D;
+}

@@ -1,0 +1,9 @@
+/* Admin styles for meta box form */
+#dmp_daily_menu_meta label {
+    display: block;
+    margin-top: 10px;
+}
+#dmp_daily_menu_meta input[type="text"] {
+    width: 100%;
+    padding: 5px;
+}
