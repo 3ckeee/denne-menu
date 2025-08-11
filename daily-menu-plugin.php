@@ -29,6 +29,13 @@ add_action( 'wp_enqueue_scripts', 'dmp_enqueue_scripts' );
 
 // Register REST API endpoint for iOS app
 function dmp_register_api_routes() {
+    // Test endpoint to verify plugin is working
+    register_rest_route('daily-menu/v1', '/test', array(
+        'methods' => 'GET',
+        'callback' => 'dmp_test_endpoint',
+        'permission_callback' => '__return_true',
+    ));
+    
     register_rest_route('daily-menu/v1', '/menus', array(
         'methods' => 'GET',
         'callback' => 'dmp_get_daily_menus_api',
@@ -44,6 +51,19 @@ function dmp_register_api_routes() {
     ));
 }
 add_action('rest_api_init', 'dmp_register_api_routes');
+
+// Test endpoint
+function dmp_test_endpoint(WP_REST_Request $request) {
+    return rest_ensure_response(array(
+        'success' => true,
+        'message' => 'Daily Menu Plugin is active and working',
+        'data' => array(
+            'plugin_version' => '0.9.9',
+            'post_type_exists' => post_type_exists('daily_menu'),
+            'current_time' => current_time('mysql')
+        )
+    ));
+}
 
 // Make custom meta fields available in WordPress REST API
 function dmp_register_meta_for_rest_api() {
