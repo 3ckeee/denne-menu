@@ -45,6 +45,91 @@ function dmp_register_api_routes() {
 }
 add_action('rest_api_init', 'dmp_register_api_routes');
 
+// Make custom meta fields available in WordPress REST API
+function dmp_register_meta_for_rest_api() {
+    register_meta('post', '_dmp_menu_date', array(
+        'show_in_rest' => true,
+        'type' => 'string',
+        'single' => true
+    ));
+    register_meta('post', '_dmp_soup', array(
+        'show_in_rest' => true,
+        'type' => 'string',
+        'single' => true
+    ));
+    register_meta('post', '_dmp_soup_weight', array(
+        'show_in_rest' => true,
+        'type' => 'string',
+        'single' => true
+    ));
+    register_meta('post', '_dmp_soup_allergens', array(
+        'show_in_rest' => true,
+        'type' => 'string',
+        'single' => true
+    ));
+    register_meta('post', '_dmp_menu1', array(
+        'show_in_rest' => true,
+        'type' => 'string',
+        'single' => true
+    ));
+    register_meta('post', '_dmp_menu1_weight', array(
+        'show_in_rest' => true,
+        'type' => 'string',
+        'single' => true
+    ));
+    register_meta('post', '_dmp_menu1_price', array(
+        'show_in_rest' => true,
+        'type' => 'string',
+        'single' => true
+    ));
+    register_meta('post', '_dmp_menu1_allergens', array(
+        'show_in_rest' => true,
+        'type' => 'string',
+        'single' => true
+    ));
+    register_meta('post', '_dmp_menu2', array(
+        'show_in_rest' => true,
+        'type' => 'string',
+        'single' => true
+    ));
+    register_meta('post', '_dmp_menu2_weight', array(
+        'show_in_rest' => true,
+        'type' => 'string',
+        'single' => true
+    ));
+    register_meta('post', '_dmp_menu2_price', array(
+        'show_in_rest' => true,
+        'type' => 'string',
+        'single' => true
+    ));
+    register_meta('post', '_dmp_menu2_allergens', array(
+        'show_in_rest' => true,
+        'type' => 'string',
+        'single' => true
+    ));
+    register_meta('post', '_dmp_business_lunch', array(
+        'show_in_rest' => true,
+        'type' => 'string',
+        'single' => true
+    ));
+    register_meta('post', '_dmp_business_lunch_weight', array(
+        'show_in_rest' => true,
+        'type' => 'string',
+        'single' => true
+    ));
+    register_meta('post', '_dmp_business_lunch_price', array(
+        'show_in_rest' => true,
+        'type' => 'string',
+        'single' => true
+    ));
+    register_meta('post', '_dmp_business_lunch_allergens', array(
+        'show_in_rest' => true,
+        'type' => 'string',
+        'single' => true
+    ));
+}
+add_action('init', 'dmp_register_meta_for_rest_api');
+
 // API callback function to get daily menus
 function dmp_get_daily_menus_api(WP_REST_Request $request) {
     $limit = $request->get_param('limit') ?: 14;
