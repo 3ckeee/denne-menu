@@ -41,6 +41,9 @@ function dmp_create_daily_menu_cpt() {
         'exclude_from_search'   => false,
         'publicly_queryable'    => true,
         'capability_type'       => 'post',
+        'show_in_rest'          => true,
+        'rest_base'             => 'daily_menu',
+        'rest_controller_class' => 'WP_REST_Posts_Controller',
     );
     register_post_type( 'daily_menu', $args );
 }
