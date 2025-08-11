@@ -27,42 +27,48 @@ function dmp_enqueue_scripts() {
 }
 add_action( 'wp_enqueue_scripts', 'dmp_enqueue_scripts' );
 
-// Register REST API endpoint for iOS app
-function dmp_register_api_routes() {
-    // Test endpoint to verify plugin is working
-    register_rest_route('daily-menu/v1', '/test', array(
-        'methods' => 'GET',
-        'callback' => 'dmp_test_endpoint',
-        'permission_callback' => '__return_true',
-    ));
-    
-    register_rest_route('daily-menu/v1', '/menus', array(
-        'methods' => 'GET',
-        'callback' => 'dmp_get_daily_menus_api',
-        'permission_callback' => '__return_true',
-        'args' => array(
-            'limit' => array(
-                'default' => 14,
-                'type' => 'integer',
-                'minimum' => 1,
-                'maximum' => 30,
-            ),
+// Add custom fields to WordPress REST API response
+function dmp_add_daily_menu_fields_to_rest() {
+    register_rest_field('daily_menu', 'daily_menu_data', array(
+        'get_callback' => 'dmp_get_daily_menu_data',
+        'schema' => array(
+            'description' => 'Daily menu data including soup, menus, and business lunch',
+            'type' => 'object',
         ),
     ));
 }
-add_action('rest_api_init', 'dmp_register_api_routes');
+add_action('rest_api_init', 'dmp_add_daily_menu_fields_to_rest');
 
-// Test endpoint
-function dmp_test_endpoint(WP_REST_Request $request) {
-    return rest_ensure_response(array(
-        'success' => true,
-        'message' => 'Daily Menu Plugin is active and working',
-        'data' => array(
-            'plugin_version' => '0.9.9',
-            'post_type_exists' => post_type_exists('daily_menu'),
-            'current_time' => current_time('mysql')
+// Get daily menu data for REST API
+function dmp_get_daily_menu_data($post) {
+    $post_id = $post['id'];
+    
+    return array(
+        'date' => get_post_meta($post_id, '_dmp_menu_date', true),
+        'soup' => array(
+            'name' => get_post_meta($post_id, '_dmp_soup', true),
+            'weight' => get_post_meta($post_id, '_dmp_soup_weight', true),
+            'allergens' => get_post_meta($post_id, '_dmp_soup_allergens', true)
+        ),
+        'menu1' => array(
+            'name' => get_post_meta($post_id, '_dmp_menu1', true),
+            'weight' => get_post_meta($post_id, '_dmp_menu1_weight', true),
+            'price' => get_post_meta($post_id, '_dmp_menu1_price', true),
+            'allergens' => get_post_meta($post_id, '_dmp_menu1_allergens', true)
+        ),
+        'menu2' => array(
+            'name' => get_post_meta($post_id, '_dmp_menu2', true),
+            'weight' => get_post_meta($post_id, '_dmp_menu2_weight', true),
+            'price' => get_post_meta($post_id, '_dmp_menu2_price', true),
+            'allergens' => get_post_meta($post_id, '_dmp_menu2_allergens', true)
+        ),
+        'business_lunch' => array(
+            'name' => get_post_meta($post_id, '_dmp_business_lunch', true),
+            'weight' => get_post_meta($post_id, '_dmp_business_lunch_weight', true),
+            'price' => get_post_meta($post_id, '_dmp_business_lunch_price', true),
+            'allergens' => get_post_meta($post_id, '_dmp_business_lunch_allergens', true)
         )
-    ));
+    );
 }
 
 // Make custom meta fields available in WordPress REST API
