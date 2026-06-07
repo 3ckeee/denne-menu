@@ -1,67 +1,79 @@
-@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;700&display=swap');
+/* =====================================================================
+   Daily menu — InFlagranti luxury styling
+   Self-contained: inherits theme tokens when present, brand fallbacks else.
+   ===================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
 
-body {
-    background-color: #000;
-    font-family: 'Archivo', sans-serif;
-    color: #B8A75D;
-    margin: 0;
-    padding: 0;
-}
-
-/* Container for daily menus */
 .daily-menu-list {
-    padding: 20px;
-    opacity: 0; /* Start hidden until animate class is added */
-    animation: fadeIn 1s forwards;  /* container fades in immediately */
+	--dmp-gold: var(--gold, #b8a75d);
+	--dmp-gold-soft: var(--gold-soft, #d4c58a);
+	--dmp-text: var(--text, #f4f1ea);
+	--dmp-muted: var(--text-muted, #a7a39a);
+	--dmp-line: rgba(255, 255, 255, 0.09);
+	--dmp-line-gold: rgba(184, 167, 93, 0.22);
+	--dmp-glass: rgba(22, 22, 22, 0.55);
+	--dmp-glass-border: rgba(255, 255, 255, 0.10);
+	--dmp-head: var(--font-head, 'Playfair Display', Georgia, serif);
+	--dmp-body: var(--font-body, 'Inter', -apple-system, sans-serif);
+
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
+	gap: clamp(1.2rem, 2.5vw, 2rem);
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 0;
+	background: transparent;
+	font-family: var(--dmp-body);
+	color: var(--dmp-text);
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-/* Daily menu items start hidden */
+/* Each day → glass card. Visible by default (never JS-hidden); the .animate
+   class (added on scroll by the plugin JS) plays a gentle rise-in. */
 .daily-menu-item {
-    padding: 15px;
-    margin-bottom: 10px;
-    opacity: 0;
+	background: var(--dmp-glass);
+	-webkit-backdrop-filter: blur(22px) saturate(140%);
+	backdrop-filter: blur(22px) saturate(140%);
+	border: 1px solid var(--dmp-glass-border);
+	border-radius: 22px;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+	padding: clamp(1.5rem, 3vw, 2.2rem);
+	margin: 0;
+	opacity: 1;
+	transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+}
+.daily-menu-item:hover {
+	transform: translateY(-6px);
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45), 0 20px 50px rgba(184, 167, 93, 0.14);
+}
+.daily-menu-item.animate { animation: dmp-rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+/* Cascade across grid columns so a row reveals in sequence. */
+.daily-menu-item:nth-child(3n+2).animate { animation-delay: 0.09s; }
+.daily-menu-item:nth-child(3n).animate { animation-delay: 0.18s; }
+@keyframes dmp-rise {
+	from { opacity: 0; transform: translateY(32px) scale(0.985); }
+	to { opacity: 1; transform: none; }
 }
 
-/* When an individual item gets the animate class, animate it: */
-.daily-menu-item.animate:nth-child(odd) {
-    background-color: #555 !important;
-    animation: slideInFromLeft 0.8s forwards;
+.daily-menu-item h2 {
+	font-family: var(--dmp-head);
+	color: var(--dmp-gold);
+	font-size: 1.5rem;
+	margin: 0 0 1rem;
+	padding-bottom: 0.8rem;
+	border-bottom: 1px solid var(--dmp-line-gold);
+}
+.daily-menu-content { color: var(--dmp-muted); }
+.daily-menu-content p { margin: 0 0 0.6rem; }
+.daily-menu-content strong { color: var(--dmp-gold-soft); font-weight: 600; }
+.daily-menu-content hr {
+	border: 0;
+	height: 1px;
+	background: var(--dmp-line);
+	margin: 1rem 0;
 }
 
-.daily-menu-item.animate:nth-child(even) {
-    background-color: #000 !important;
-    animation: slideInFromRight 0.8s forwards;
-}
-
-@keyframes slideInFromLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-100%);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes slideInFromRight {
-    from {
-        opacity: 0;
-        transform: translateX(100%);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-/* Text styling for menu items */
-.daily-menu-item h2,
-.daily-menu-item .daily-menu-content {
-    color: #B8A75D;
+@media (prefers-reduced-motion: reduce) {
+	.daily-menu-item { transition: none; }
+	.daily-menu-item:hover { transform: none; }
+	.daily-menu-item.animate { animation: none; }
 }

@@ -22,7 +22,9 @@ require_once DMP_PLUGIN_DIR . 'includes/shortcode.php';
 
 // Enqueue front-end scripts and styles.
 function dmp_enqueue_scripts() {
-    wp_enqueue_style( 'dmp-style', DMP_PLUGIN_URL . 'css/style.css', array(), '0.9.5' );
+    // filemtime versioning so style edits always bust the cache.
+    $css_ver = file_exists( DMP_PLUGIN_DIR . 'css/style.css' ) ? filemtime( DMP_PLUGIN_DIR . 'css/style.css' ) : '0.9.5';
+    wp_enqueue_style( 'dmp-style', DMP_PLUGIN_URL . 'css/style.css', array(), $css_ver );
     wp_enqueue_script( 'dmp-script', DMP_PLUGIN_URL . 'js/script.js', array( 'jquery' ), '0.9.5', true );
 }
 add_action( 'wp_enqueue_scripts', 'dmp_enqueue_scripts' );
