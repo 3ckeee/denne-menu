@@ -114,30 +114,12 @@ function dmp_render_daily_menu_meta_box( $post ) {
 }
 
 /**
- * Save the meta box data when the post is saved.
+ * The meta box fields, keyed by request field name.
+ *
+ * @return array<string,string> Field name => meta key.
  */
-function dmp_save_daily_menu_meta_box_data( $post_id ) {
-    // Check if our nonce is set.
-    if ( ! isset( $_POST['dmp_daily_menu_meta_box_nonce'] ) ) {
-        return;
-    }
-    // Verify that the nonce is valid.
-    if ( ! wp_verify_nonce( $_POST['dmp_daily_menu_meta_box_nonce'], 'dmp_daily_menu_meta_box' ) ) {
-        return;
-    }
-    // Prevent autosave from overwriting our data.
-    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-        return;
-    }
-    // Check user permissions.
-    if ( isset( $_POST['post_type'] ) && 'daily_menu' == $_POST['post_type'] ) {
-        if ( ! current_user_can( 'edit_post', $post_id ) ) {
-            return;
-        }
-    }
-    
-    // Define the meta fields to be saved.
-    $fields = array(
+function dmp_get_menu_fields() {
+    return array(
         'dmp_menu_date'               => '_dmp_menu_date',
         'dmp_soup'                    => '_dmp_soup',
         'dmp_soup_weight'             => '_dmp_soup_weight',
@@ -155,32 +137,106 @@ function dmp_save_daily_menu_meta_box_data( $post_id ) {
         'dmp_business_lunch_price'    => '_dmp_business_lunch_price',
         'dmp_business_lunch_allergens'=> '_dmp_business_lunch_allergens'
     );
-    
-    foreach( $fields as $field_name => $meta_key ) {
-        if ( isset( $_POST[ $field_name ] ) ) {
-            update_post_meta( $post_id, $meta_key, sanitize_text_field( $_POST[ $field_name ] ) );
-        }
+}
+
+/**
+ * Read every menu field for a post, keyed by meta key.
+ *
+ * @param int $post_id Daily menu post ID.
+ * @return array<string,string>
+ */
+function dmp_get_menu_values( $post_id ) {
+    $values = array();
+    foreach ( dmp_get_menu_fields() as $meta_key ) {
+        $values[ $meta_key ] = (string) get_post_meta( $post_id, $meta_key, true );
     }
-    
-    // Build the final post content from meta fields.
-    $content  = "<p><strong>Dátum:</strong> " . get_post_meta( $post_id, '_dmp_menu_date', true ) . "</p>";
-    $content .= "<p><strong>Polievka:</strong> " . get_post_meta( $post_id, '_dmp_soup', true ) . " &nbsp;&nbsp;&nbsp;&nbsp;<strong>Váha/Objem:</strong> " . get_post_meta( $post_id, '_dmp_soup_weight', true ) . "</p>";
-    $content .= "<p style='font-size:0.8em;'><strong>Alergény:</strong> " . get_post_meta( $post_id, '_dmp_soup_allergens', true ) . "</p>";
+    return $values;
+}
+
+/**
+ * Render the menu as HTML.
+ *
+ * This is the single source of the daily menu markup: it is stored in
+ * post_content on save (so the REST API and the app keep working) and is what
+ * the shortcode prints, so the page can never drift from the form.
+ *
+ * @param array<string,string> $values Meta key => value, as from dmp_get_menu_values().
+ * @return string
+ */
+function dmp_build_menu_content( $values ) {
+    $get = static function ( $meta_key ) use ( $values ) {
+        return isset( $values[ $meta_key ] ) ? esc_html( $values[ $meta_key ] ) : '';
+    };
+    $gap = ' &nbsp;&nbsp;&nbsp;&nbsp;';
+
+    $content  = "<p><strong>Dátum:</strong> " . $get( '_dmp_menu_date' ) . "</p>";
+    $content .= "<p><strong>Polievka:</strong> " . $get( '_dmp_soup' ) . $gap . "<strong>Váha/Objem:</strong> " . $get( '_dmp_soup_weight' ) . "</p>";
+    $content .= "<p style='font-size:0.8em;'><strong>Alergény:</strong> " . $get( '_dmp_soup_allergens' ) . "</p>";
     $content .= "<hr />";
-    $content .= "<p><strong>Menu 1:</strong> " . get_post_meta( $post_id, '_dmp_menu1', true ) . " &nbsp;&nbsp;&nbsp;&nbsp;<strong>Váha/Objem:</strong> " . get_post_meta( $post_id, '_dmp_menu1_weight', true ) . " &nbsp;&nbsp;&nbsp;&nbsp;<strong>Cena:</strong> " . get_post_meta( $post_id, '_dmp_menu1_price', true ) . "</p>";
-    $content .= "<p style='font-size:0.8em;'><strong>Alergény:</strong> " . get_post_meta( $post_id, '_dmp_menu1_allergens', true ) . "</p>";
+    $content .= "<p><strong>Menu 1:</strong> " . $get( '_dmp_menu1' ) . $gap . "<strong>Váha/Objem:</strong> " . $get( '_dmp_menu1_weight' ) . $gap . "<strong>Cena:</strong> " . $get( '_dmp_menu1_price' ) . "</p>";
+    $content .= "<p style='font-size:0.8em;'><strong>Alergény:</strong> " . $get( '_dmp_menu1_allergens' ) . "</p>";
     $content .= "<hr />";
-    $content .= "<p><strong>Menu 2:</strong> " . get_post_meta( $post_id, '_dmp_menu2', true ) . " &nbsp;&nbsp;&nbsp;&nbsp;<strong>Váha/Objem:</strong> " . get_post_meta( $post_id, '_dmp_menu2_weight', true ) . " &nbsp;&nbsp;&nbsp;&nbsp;<strong>Cena:</strong> " . get_post_meta( $post_id, '_dmp_menu2_price', true ) . "</p>";
-    $content .= "<p style='font-size:0.8em;'><strong>Alergény:</strong> " . get_post_meta( $post_id, '_dmp_menu2_allergens', true ) . "</p>";
+    $content .= "<p><strong>Menu 2:</strong> " . $get( '_dmp_menu2' ) . $gap . "<strong>Váha/Objem:</strong> " . $get( '_dmp_menu2_weight' ) . $gap . "<strong>Cena:</strong> " . $get( '_dmp_menu2_price' ) . "</p>";
+    $content .= "<p style='font-size:0.8em;'><strong>Alergény:</strong> " . $get( '_dmp_menu2_allergens' ) . "</p>";
     $content .= "<hr />";
-    $content .= "<p><strong>Business Lunch:</strong> " . get_post_meta( $post_id, '_dmp_business_lunch', true ) . " &nbsp;&nbsp;&nbsp;&nbsp;<strong>Váha/Objem:</strong> " . get_post_meta( $post_id, '_dmp_business_lunch_weight', true ) . " &nbsp;&nbsp;&nbsp;&nbsp;<strong>Cena:</strong> " . get_post_meta( $post_id, '_dmp_business_lunch_price', true ) . "</p>";
-    $content .= "<p style='font-size:0.8em;'><strong>Alergény:</strong> " . get_post_meta( $post_id, '_dmp_business_lunch_allergens', true ) . "</p>";
-    
+    $content .= "<p><strong>Business Lunch:</strong> " . $get( '_dmp_business_lunch' ) . $gap . "<strong>Váha/Objem:</strong> " . $get( '_dmp_business_lunch_weight' ) . $gap . "<strong>Cena:</strong> " . $get( '_dmp_business_lunch_price' ) . "</p>";
+    $content .= "<p style='font-size:0.8em;'><strong>Alergény:</strong> " . $get( '_dmp_business_lunch_allergens' ) . "</p>";
+
+    return $content;
+}
+
+/**
+ * Save the meta box data when the post is saved.
+ */
+function dmp_save_daily_menu_meta_box_data( $post_id ) {
+    // save_post also fires for the revision WordPress takes before the update
+    // and for autosaves; writing the form into those corrupts the revision and
+    // leaves the real post untouched.
+    if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
+        return;
+    }
+    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+        return;
+    }
+    if ( 'daily_menu' !== get_post_type( $post_id ) ) {
+        return;
+    }
+    // Check that our nonce is set and valid.
+    if ( ! isset( $_POST['dmp_daily_menu_meta_box_nonce'] ) ) {
+        return;
+    }
+    if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dmp_daily_menu_meta_box_nonce'] ) ), 'dmp_daily_menu_meta_box' ) ) {
+        return;
+    }
+    // Check user permissions.
+    if ( ! current_user_can( 'edit_post', $post_id ) ) {
+        return;
+    }
+
+    // Save the submitted fields, and keep the values so the content below is
+    // built from what was just posted rather than from a second DB read.
+    $values = array();
+    foreach ( dmp_get_menu_fields() as $field_name => $meta_key ) {
+        if ( ! isset( $_POST[ $field_name ] ) ) {
+            $values[ $meta_key ] = (string) get_post_meta( $post_id, $meta_key, true );
+            continue;
+        }
+        $value = sanitize_text_field( wp_unslash( $_POST[ $field_name ] ) );
+        update_post_meta( $post_id, $meta_key, $value );
+        $values[ $meta_key ] = $value;
+    }
+
+    $content = dmp_build_menu_content( $values );
+
+    if ( $content === get_post_field( 'post_content', $post_id ) ) {
+        return;
+    }
+
     // Prevent recursive triggering of save_post by temporarily removing our action.
     remove_action( 'save_post', 'dmp_save_daily_menu_meta_box_data' );
     wp_update_post( array(
         'ID'           => $post_id,
-        'post_content' => $content,
+        'post_content' => wp_slash( $content ),
     ) );
     add_action( 'save_post', 'dmp_save_daily_menu_meta_box_data' );
 }

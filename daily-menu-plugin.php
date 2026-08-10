@@ -3,7 +3,7 @@
 Plugin Name: Daily Menu Plugin
 Plugin URI: https://diverzitystudios.sk
 Description: A plugin to manage daily menus via a custom post type with default template content and a fill-out form. Accessible for all users.
-Version: 0.9.9
+Version: 1.0.0
 Author: Erik Kokinda
 */
 
@@ -23,9 +23,10 @@ require_once DMP_PLUGIN_DIR . 'includes/shortcode.php';
 // Enqueue front-end scripts and styles.
 function dmp_enqueue_scripts() {
     // filemtime versioning so style edits always bust the cache.
-    $css_ver = file_exists( DMP_PLUGIN_DIR . 'css/style.css' ) ? filemtime( DMP_PLUGIN_DIR . 'css/style.css' ) : '0.9.5';
+    $css_ver = file_exists( DMP_PLUGIN_DIR . 'css/style.css' ) ? filemtime( DMP_PLUGIN_DIR . 'css/style.css' ) : '1.0.0';
+    $js_ver  = file_exists( DMP_PLUGIN_DIR . 'js/script.js' ) ? filemtime( DMP_PLUGIN_DIR . 'js/script.js' ) : '1.0.0';
     wp_enqueue_style( 'dmp-style', DMP_PLUGIN_URL . 'css/style.css', array(), $css_ver );
-    wp_enqueue_script( 'dmp-script', DMP_PLUGIN_URL . 'js/script.js', array( 'jquery' ), '0.9.5', true );
+    wp_enqueue_script( 'dmp-script', DMP_PLUGIN_URL . 'js/script.js', array( 'jquery' ), $js_ver, true );
 }
 add_action( 'wp_enqueue_scripts', 'dmp_enqueue_scripts' );
 

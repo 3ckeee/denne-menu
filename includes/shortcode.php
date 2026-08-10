@@ -3,6 +3,26 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+/**
+ * Print a single menu, built from the meta box fields.
+ *
+ * Rendering from the fields rather than from post_content means the page shows
+ * what the form holds even if a save ever failed to regenerate the body. Posts
+ * predating the meta box (empty fields) still fall back to their content.
+ *
+ * @param int $post_id Daily menu post ID.
+ * @return string
+ */
+function dmp_render_menu_body( $post_id ) {
+    $values = dmp_get_menu_values( $post_id );
+
+    if ( '' === trim( implode( '', $values ) ) ) {
+        return apply_filters( 'the_content', get_the_content( null, false, $post_id ) );
+    }
+
+    return wptexturize( dmp_build_menu_content( $values ) );
+}
+
 function dmp_daily_menu_shortcode( $atts ) {
     $atts = shortcode_atts( array(
         'limit' => 14,
@@ -24,7 +44,7 @@ function dmp_daily_menu_shortcode( $atts ) {
             $query->the_post();
             echo '<div class="daily-menu-item">';
             echo '<h2>' . get_the_title() . '</h2>';
-            echo '<div class="daily-menu-content">' . apply_filters('the_content', get_the_content()) . '</div>';
+            echo '<div class="daily-menu-content">' . dmp_render_menu_body( get_the_ID() ) . '</div>';
             echo '</div>';
         }
     } else {
